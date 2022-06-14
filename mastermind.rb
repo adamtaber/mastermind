@@ -7,6 +7,7 @@ class Mastermind
     @guess_key = 0
     @code_value = 0
     @turn_number = 0
+    @round_number = 0
     @player_score = 0
     @computer_score = 0
     @gameboard = create_board
@@ -15,8 +16,10 @@ class Mastermind
     @value_location = 0
     @combo_value_location = 0
     @round_over = false
+    @all_combinations = 0
     @potential_combinations = 0
     @new_combinations = []
+    @play_again_yes = 0
   end
 
   def create_board
@@ -59,18 +62,67 @@ class Mastermind
   end
 
   def play_round
+    @round_number += 1
     if @player_creator == true
       get_four_values
       @code_value = @four_values
       until @round_over == true
         play_computer_guess
       end
-      puts "The round is over. You have #{@player_score} points, I have #{@computer_score} points"
       @player_creator = false
       @turn_number = 0
       @round_over = false
       @potential_combinations = generate_potential_guesses
+      game_over?
+    elsif @player_creator == false
+      get_computer_code
+      until @round_over == true
+        play_player_guess
+      end
+      @player_creator = true
+      @turn_number = 0
+      @round_over = false
+      @potential_combinations = generate_potential_guesses
+      game_over?
     end
+  end
+
+  def game_over?
+    if @round_number == 1
+      puts "The round is over. You have #{@player_score} points, I have #{@computer_score} points"
+      play_round
+    elsif @round_number == 2
+      if @player_score > @computer_score
+        puts "You're the winner with #{@player_score} points. I'm the loser with #{@computer_score} points"
+        play_again?
+      elsif @player_score < @computer_score
+        puts "You're the loser with #{@player_score} points. I'm the winner with #{@computer_score} points"
+        play_again?
+      elsif @player_score == @computer_score
+        puts "It's a tie! We both have #{@player_score} points"
+        play_again?
+      end
+    end
+  end
+
+  def play_again?
+    puts "Would you like to play again? (y/n)"
+    @play_again_yes = gets.chomp.downcase
+    if @play_again_yes == "y"
+      @round_number = 0
+      play_round
+    elsif @play_again_yes == "n"
+      puts "Farewell, thank you for playing!"
+    else
+      play_again?
+    end
+  end
+
+  def play_player_guess
+    @turn_number += 1
+    @computer_score += 1
+    get_player_guess
+    winner?
   end
 
   def play_computer_guess
@@ -87,6 +139,24 @@ class Mastermind
       get_four_values
     elsif @four_values.length != 4
       get_four_values
+    end
+  end
+
+  def get_computer_code
+    generate_potential_guesses
+    @code_value = @potential_combinations.sample
+  end
+
+  def get_player_guess
+    puts "Please enter four values between 1 and 6. This will be your guess"
+    @guess_value = gets.chomp.gsub(/\s+/, '').split('').map(&:to_i)
+    if @guess_value.difference([1, 2, 3, 4, 5, 6]).length != 0
+      get_player_guess
+    elsif @guess_value.length != 4
+      get_player_guess
+    else
+      get_guess_key
+      puts_board
     end
   end
 
@@ -111,6 +181,7 @@ class Mastermind
     @potential_combinations.reject! do |x|
       x.include?(0) || x.include?(7) || x.include?(8) || x.include?(9)
     end
+    @all_combinations = @potential_combinations
   end
 
   def winner?
