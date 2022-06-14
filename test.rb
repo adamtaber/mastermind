@@ -34,6 +34,7 @@ class Mastermind
         puts @gameboard[index]
       end
     end
+    puts "-------------------------------------------------------------"
   end
 
   def play_mastermind
@@ -51,7 +52,7 @@ class Mastermind
     when 'code guesser'
       @player_creator = false
     else
-      'please type code creator or code guesser'
+      puts 'please type code creator or code guesser'
       @player_role = gets.chomp.downcase
       assign_role
     end
@@ -91,8 +92,8 @@ class Mastermind
       get_guess_key
       puts_board
     else
-      generate_permutations
-      @permutations
+#      generate_permutations
+#      @permutations
       generate_new_combinations
       @guess_value = @new_combinations.min
       get_guess_key
@@ -143,43 +144,65 @@ class Mastermind
 
   def generate_new_combinations
     find_exact_match
-    find_perm_inclusions
-    @new_combinations.uniq!.sort!
+#    find_perm_inclusions
+    @new_combinations = @new_combinations.uniq.sort!
   end
 
   def find_exact_match
     @potential_combinations.each do |combination|
       combination.each_index do |index|
-        if combination[index] == @guess_value[index]
+        if @value_location == 0 && (combination[index] == @guess_value[index])
+          @value_location_comp += 1
+        elsif (@value_location > 0) && (combination[index] == @guess_value[index])
           @value_location_comp += 1
         end
       end
-      if @value_location_comp == @value_location
+      if (@value_location == 0) && (@value_location_comp == 0)
+        @new_combinations.push(combination)
+      elsif (@value_location_comp == @value_location) && (@value_location != 0)
         @new_combinations.push(combination)
       end
       @value_location_comp = 0
     end
   end
+end
 
-  def find_perm_inclusions
-    @potential_combinations.each do |combination|
-      @permutations.each do |permutation|
-        if combination.join.include?(permutation.join)
-          @new_combinations.push(combination)
-        end
-      end
-    end
-  end
+#  def find_perm_inclusions
+#    @potential_combinations.each do |combination|
+#      if @value_only == 0 && combination.difference(@guess_value).length == 4
+#        @new_combinations.push(combination)
+#      else
+#        for i in 1..6
+#          if (@guess_value.count(i) > @value_only) && (combination.count(i) <= @value_only)
+#            @new_combinations.push(combination)
+#          elsif (@guess_value.count(i) <= @value_only) && (combination.count(i) >= @guess_value.count(i))
+#            @new_combinations.push(combination)
+#          end
+#        end
+#      end
+#    end
+
+
+
+
+
+#    @potential_combinations.each do |combination|
+#      @permutations.each do |permutation|
+#        if combination.join.include?(permutation.join)
+#          @new_combinations.push(combination)
+#        end
+#      end
+#    end
+#  end
   
 
-  def generate_permutations
-    @guess_value.permutation(@value_only) do |x|
-      @permutations.push(x)
-    end
-    @permutations.uniq!
-  end
+#  def generate_permutations
+#    @guess_value.permutation(@value_only) do |x|
+#      @permutations.push(x)
+#    end
+#   @permutations.uniq!
+#  end
         
 
 
-end
 Mastermind.new.play_mastermind
