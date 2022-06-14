@@ -83,6 +83,11 @@ class Mastermind
   def get_four_values
     puts "Please enter four values between 1 and 6. This will be your code"
     @four_values = gets.chomp.gsub(/\s+/, '').split('').map(&:to_i)
+    if @four_values.difference([1, 2, 3, 4, 5, 6]).length != 0
+      get_four_values
+    elsif @four_values.length != 4
+      get_four_values
+    end
   end
 
   def get_computer_guess
